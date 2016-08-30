@@ -1,6 +1,6 @@
 //
 //  main.c
-//  MullePokemonPigeonEconomy
+//  MullePokemonGoPidgeyEconomy
 //
 //  Created by Nat! on 30.08.16.
 //  Copyright © 2016 Mulle kybernetiK. All rights reserved.
@@ -19,8 +19,6 @@ enum
 
 
 #define STRATEGY  keep_one
-#define VERBOSE   0
-
 
 struct pokemongo
 {
@@ -33,16 +31,37 @@ struct pokemongo
 };
 
 
+
+static double  pokemongo_get_average_per_catch( struct pokemongo *p)
+{
+   if( ! p->catches)
+      return( 0.0);
+   return( (p->ep_100 * 100.00) / p->catches);
+}
+
+
+#if VERBOSE
+static double  pokemongo_get_average_per_step( struct pokemongo *p)
+{
+   if( ! p->steps)
+      return( 0.0);
+   return( (p->ep_100 * 100.00) / p->steps);
+}
+#endif
+
+
+
 static void   pokemongo_step( struct pokemongo *p, char *op)
 {
    ++p->steps;
 #if VERBOSE
-   fprintf( stderr, "%d: %s %d %d %d\n",
+   fprintf( stderr, "%d: %s %d %d %d %f\n",
                p->steps,
                op,
                p->pidgey + p->pidgeotto,
                p->candy,
-               p->ep_100 * 100);
+               p->ep_100 * 100,
+               pokemongo_get_average_per_catch( p));
 #endif
 }
 
@@ -76,11 +95,11 @@ static void   pokemongo_transform( struct pokemongo *p)
    assert( p->pidgey >= 1);
    assert( p->candy >= 12);
    
-   p->ep_100  += 5;
-   p->candy   -= 12;
-   p->pidgey  -= 1;
+   p->ep_100    += 5;
+   p->candy     -= 12;
+   p->pidgey    -= 1;
    p->pidgeotto += 1;
-   p->candy   += 1;
+   p->candy     += 1;
    pokemongo_step( p, "transform");
 }
 
@@ -101,35 +120,17 @@ static int   pokemongo_can_transform( struct pokemongo *p)
 }
 
 
-static double  pokemongo_get_average_per_catch( struct pokemongo *p)
-{
-   if( ! p->catches)
-      return( 0.0);
-   return( p->ep_100 * 100 / p->catches);
-}
-
-
-#if VERBOSE
-static double  pokemongo_get_average_per_step( struct pokemongo *p)
-{
-   if( ! p->steps)
-      return( 0.0);
-   return( p->ep_100 * 100 / p->steps);
-}
-#endif
-
-
 int main(int argc, const char * argv[])
 {
    struct pokemongo   game;
-   
+
    for(;;)
    {
       if( game.ep_100 >= 1000000 / 100)  // 1 mio EP
       {
          printf( "ep            : %ld\n", (long) game.ep_100 * 100);
 #if VERBOSE
-         printf( "rate          : %.2f\n", get_average_per_step( &game));
+         printf( "rate          : %.2f\n", pokemongo_get_average_per_step( &game));
 #endif
          printf( "avg per catch : %.2f\n", pokemongo_get_average_per_catch( &game));
          break;

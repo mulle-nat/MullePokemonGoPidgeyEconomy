@@ -12,5 +12,5 @@ This program calculates the average EP worth of a [Pidgey](//pokemon.wikia.com/w
 
 ```
 ep            : 1000000
-avg per catch : 281.00
+avg per catch : 281.69
 ```
