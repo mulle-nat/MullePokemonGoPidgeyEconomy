@@ -31,6 +31,7 @@ struct pokemongo
    int   candy;
    int   ep_100;
    int   catches;
+   int   transforms;
    int   steps;
 };
 
@@ -49,6 +50,16 @@ static double  pokemongo_get_average_per_step( struct pokemongo *p)
    if( ! p->steps)
       return( 0.0);
    return( p->ep_100 * 100.0 / p->steps);
+}
+#endif
+
+
+#if VERBOSE
+static double  pokemongo_get_average_per_transform( struct pokemongo *p)
+{
+   if( ! p->transforms)
+      return( 0.0);
+   return( p->ep_100 * 100.0 / p->transforms);
 }
 #endif
 
@@ -101,14 +112,15 @@ static void   pokemongo_transform( struct pokemongo *p)
    assert( p->candy >= 12);
 
 #if DOUBLE_EGG
-   p->ep_100    += 10;
+   p->ep_100     += 10;
 #else
-   p->ep_100    += 5;
+   p->ep_100     += 5;
 #endif
-   p->candy     -= 12;
-   p->pidgey    -= 1;
-   p->pidgeotto += 1;
-   p->candy     += 1;
+   p->candy      -= 12;
+   p->pidgey     -= 1;
+   p->pidgeotto  += 1;
+   p->candy      += 1;
+   p->transforms += 1;
 
    pokemongo_step( p, "transform");
 }
@@ -137,10 +149,11 @@ int main( int argc, const char * argv[])
    memset( &game, 0, sizeof( game));
    for(;;)
    {
-      if( game.ep_100 >= 1000000 / 100)  // 1 mio EP
+      if( game.ep_100 >= 50000 / 100)  // 1 mio EP
       {
          printf( "ep            : %ld\n", (long) game.ep_100 * 100);
 #if VERBOSE
+         printf( "transforms    : %d\n", game.transforms);
          printf( "rate          : %.2f\n", pokemongo_get_average_per_step( &game));
 #endif
          printf( "avg per catch : %.2f\n", pokemongo_get_average_per_catch( &game));
