@@ -6,9 +6,10 @@
 //  Copyright © 2016 Mulle kybernetiK. All rights reserved.
 //
 
-#include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 
 enum
@@ -18,7 +19,10 @@ enum
 };
 
 
-#define STRATEGY  keep_one
+#define STRATEGY     keep_one
+#define VERBOSE      0
+#define DOUBLE_EGG   0
+
 
 struct pokemongo
 {
@@ -31,12 +35,11 @@ struct pokemongo
 };
 
 
-
 static double  pokemongo_get_average_per_catch( struct pokemongo *p)
 {
    if( ! p->catches)
       return( 0.0);
-   return( (p->ep_100 * 100.00) / p->catches);
+   return( p->ep_100 * 100.0 / p->catches);
 }
 
 
@@ -45,7 +48,7 @@ static double  pokemongo_get_average_per_step( struct pokemongo *p)
 {
    if( ! p->steps)
       return( 0.0);
-   return( (p->ep_100 * 100.00) / p->steps);
+   return( p->ep_100 * 100.0 / p->steps);
 }
 #endif
 
@@ -55,7 +58,7 @@ static void   pokemongo_step( struct pokemongo *p, char *op)
 {
    ++p->steps;
 #if VERBOSE
-   fprintf( stderr, "%d: %s %d %d %d %f\n",
+   fprintf( stderr, "%d: %s %d %d %d %.2f\n",
                p->steps,
                op,
                p->pidgey + p->pidgeotto,
@@ -72,6 +75,7 @@ static void   pokemongo_catch( struct pokemongo *p)
    p->pidgey  += 1;
    p->candy   += 3;
    p->ep_100  += 1;
+
    pokemongo_step( p, "catch");
 }
 
@@ -86,6 +90,7 @@ static void   pokemongo_sell( struct pokemongo *p)
       p->pidgey  -= 1;
 
    p->candy += 1;
+
    pokemongo_step( p, "sell");
 }
 
@@ -94,12 +99,17 @@ static void   pokemongo_transform( struct pokemongo *p)
 {
    assert( p->pidgey >= 1);
    assert( p->candy >= 12);
-   
+
+#if DOUBLE_EGG
+   p->ep_100    += 10;
+#else
    p->ep_100    += 5;
+#endif
    p->candy     -= 12;
    p->pidgey    -= 1;
    p->pidgeotto += 1;
    p->candy     += 1;
+
    pokemongo_step( p, "transform");
 }
 
@@ -120,10 +130,11 @@ static int   pokemongo_can_transform( struct pokemongo *p)
 }
 
 
-int main(int argc, const char * argv[])
+int main( int argc, const char * argv[])
 {
    struct pokemongo   game;
 
+   memset( &game, 0, sizeof( game));
    for(;;)
    {
       if( game.ep_100 >= 1000000 / 100)  // 1 mio EP
@@ -135,7 +146,7 @@ int main(int argc, const char * argv[])
          printf( "avg per catch : %.2f\n", pokemongo_get_average_per_catch( &game));
          break;
       }
-      
+
       if( pokemongo_can_transform( &game))
       {
          pokemongo_transform( &game);
@@ -147,7 +158,7 @@ int main(int argc, const char * argv[])
          pokemongo_sell( &game);
          continue;
       }
-      
+
       pokemongo_catch( &game);
    }
 }

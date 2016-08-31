@@ -11,6 +11,11 @@ This program calculates the average EP worth of a [Pidgey](//pokemon.wikia.com/w
 ### Expected output
 
 ```
-ep            : 1000000
 avg per catch : 281.69
+```
+
+with "Double Egg" during transforms:
+
+```
+avg per catch : 462.96
 ```
